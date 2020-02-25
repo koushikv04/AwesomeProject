@@ -7,7 +7,24 @@
 //
 
 #import "WeatherAPI.h"
+#import "AwesomeProject-Swift.h"
+#import <React/RCTLog.h>
 
 @implementation WeatherAPI
+
+RCT_EXPORT_MODULE();
+
+RCT_EXPORT_METHOD(fetchWeatherData:(NSString *)location callback:(RCTResponseSenderBlock)callback)
+{
+  self.weatherClass = [[WeatherClass alloc]init];
+  
+  [self.weatherClass fetchWeatherDataWithLocation:location completionHandler:^(WeatherData * data) {
+    
+    NSDictionary* responseDictionary = [data convertToDictionary];
+    RCTLogInfo(@"%@",responseDictionary);
+    callback(@[responseDictionary]);
+  }];
+  
+}
 
 @end

@@ -16,6 +16,7 @@ import {
   Text,
   StatusBar,
   NativeModules,
+  Picker,
   Alert,
   FlatList
 } from 'react-native';
@@ -34,13 +35,16 @@ export default class App extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
-      weatherText : {name:""}
+      weatherText : {name:""},
+      city:"Dublin,IE",
+      showView: false
     }
   }
-  getWeatherData = () => {
-    var AwesomeProject = NativeModules.AwesomeProject;
-    AwesomeProject.fetchWeatherData((weatherInfo)=> {
-      if(weatherInfo){
+  getWeatherData = (city) => {
+    var WeatherAPI = NativeModules.WeatherAPI;
+    WeatherAPI.fetchWeatherData(city, (weatherInfo)=> {
+      if(weatherInfo && weatherInfo.cod == 200){
+        this.state.showView = true;
         var info = weatherInfo.main;
         var sys = weatherInfo.sys;
         var desc = weatherInfo.weather[0];
@@ -48,11 +52,12 @@ export default class App extends React.Component {
         info.desc = desc.description;
         info.name = weatherInfo.name;
         info.country = sys.country;
-        info.wind = weatherInfo.wind.toString();
+
+
       this.setState({weatherText:info});
     }
     else {
-      Alert.alert("Unable to fetch data. Please try again later");
+      Alert.alert(weatherInfo.message);
     }
       });
   }
@@ -60,7 +65,16 @@ export default class App extends React.Component {
       return (
         <>
         <SafeAreaView>
-          <Button title="FetchWeather" onPress={()=>{this.getWeatherData()}}/>
+        <ScrollView>
+        <Text style = {styles.sectionDescription}>Pick a City</Text>
+        <Picker selectedValue = {this.state.city}  onValueChange={(value,index)=> {this.setState({city:value});
+          this.getWeatherData(value)}}>
+          <Picker.Item label="Dublin" value="dublin,IE"/>
+          <Picker.Item label="London" value="London,GB"/>
+          <Picker.Item label="Barcelona" value="Barcelona,ES"/>
+        </Picker>
+          {
+            this.state.showView ? (
           <FlatList
             data={[this.state.weatherText]}
             renderItem={({item})=>
@@ -77,6 +91,9 @@ export default class App extends React.Component {
               }
               keyExtractor={item=>item.id}
             />
+            ):null
+          }
+          </ScrollView>
         </SafeAreaView>
         </>
         );
@@ -96,7 +113,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginTop: 32,
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   sectionTitle: {
     fontSize: 50,
