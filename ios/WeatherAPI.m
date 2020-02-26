@@ -16,7 +16,7 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(fetchWeatherData:(NSString *)location callback:(RCTResponseSenderBlock)callback)
 {
-  self.weatherClass = [[WeatherClass alloc]init];
+  self.weatherClass = WeatherClass.sharedInstance;
   
   [self.weatherClass fetchWeatherDataWithLocation:location completionHandler:^(WeatherData * data) {
     
